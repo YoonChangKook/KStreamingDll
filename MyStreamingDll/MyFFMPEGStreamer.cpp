@@ -2,7 +2,7 @@
 #include "MyFFMPEGStreamer.h"
 
 MyFFMPEGStreamer::MyFFMPEGStreamer()
-	: last_error(MyFFMPEGError::NO_FFMPEG_ERROR), 
+	: last_error(MyFFMPEGStreamerError::NO_FFMPEG_ERROR), 
 	ip("127.0.0.1"), port(8554), codec_id(AV_CODEC_ID_MPEG4),
 	fmt(NULL), oc(NULL), video_st(NULL), video_is_eof(0) //, audio_st(NULL), audio_is_eof(0)
 {}
@@ -167,7 +167,7 @@ AVStream* MyFFMPEGStreamer::add_stream(AVFormatContext *oc, AVCodec **codec, enu
 
 	case AVMEDIA_TYPE_VIDEO:
 		c->codec_id = codec_id;
-		c->bit_rate = 1150000;
+		c->bit_rate = 3500000;
 		/* Resolution must be a multiple of two. */
 		c->width = img_width;
 		c->height = img_height;

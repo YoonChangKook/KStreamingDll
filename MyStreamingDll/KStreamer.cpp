@@ -25,11 +25,36 @@ bool KStreamer::StartStream()
 {
 	EndStream();
 
-	this->video_cap.open(this->device_id);
-	if (!this->video_cap.isOpened())
+	if (this->device_id == DEVICE_OPTION::ZED_CAMERA_LEFT ||
+		this->device_id == DEVICE_OPTION::ZED_CAMERA_RIGHT ||
+		this->device_id == DEVICE_OPTION::ZED_CAMERA_STEREO)
 	{
-		this->last_error = KStreamerError::CAM_NOT_OPENED;
-		return false;
+		this->zed_camera = new sl::zed::Camera(sl::zed::HD720, 30);
+		this->zed_params.mode = sl::zed::PERFORMANCE;
+		this->zed_params.unit = sl::zed::MILLIMETER;
+		this->zed_params.coordinate = sl::zed::IMAGE;
+		this->zed_params.disableSelfCalib = false;
+		this->zed_params.device = -1;
+		this->zed_params.verbose = false;
+		this->zed_params.vflip = false;
+
+		sl::zed::ERRCODE zederr = zed_camera->init(zed_params);
+
+		if (zederr != sl::zed::SUCCESS)
+		{
+			this->last_error = KStreamerError::CAM_NOT_OPENED;
+			delete zed_camera;
+			return false;
+		}
+	}
+	else
+	{
+		this->video_cap.open(this->device_id);
+		if (!this->video_cap.isOpened())
+		{
+			this->last_error = KStreamerError::CAM_NOT_OPENED;
+			return false;
+		}
 	}
 
 	mtx_lock.lock();
@@ -76,6 +101,7 @@ int KStreamer::GetLastError()
 void KStreamer::SendStream()
 {
 	cv::Mat cam_img;
+	int func_device_id = this->device_id;
 
 	while (true)
 	{
@@ -83,8 +109,56 @@ void KStreamer::SendStream()
 		bool thread_end = this->is_streaming;
 		mtx_lock.unlock();
 
-		// get image from opencv
-		this->video_cap >> cam_img;
+		// get image from camera
+		if (func_device_id == DEVICE_OPTION::ZED_CAMERA_LEFT ||
+			func_device_id == DEVICE_OPTION::ZED_CAMERA_RIGHT)
+		{
+			int width = zed_camera->getImageSize().width;
+			int height = zed_camera->getImageSize().height;
+			cv::Mat cam_temp = cv::Mat(height, width, CV_8UC4);
+			cam_img = cv::Mat(height, width, CV_8UC3);
+
+			if (!zed_camera->grab(sl::zed::SENSING_MODE::STANDARD))
+			{
+				// Retrieve left color image
+				sl::zed::Mat zedMat;
+				if (func_device_id == DEVICE_OPTION::ZED_CAMERA_LEFT)
+					zedMat = zed_camera->retrieveImage(sl::zed::SIDE::LEFT);
+				else if (func_device_id == DEVICE_OPTION::ZED_CAMERA_RIGHT)
+					zedMat = zed_camera->retrieveImage(sl::zed::SIDE::RIGHT);
+
+				memcpy(cam_temp.data, zedMat.data, width*height * 4 * sizeof(uchar));
+
+				cv::cvtColor(cam_temp, cam_img, cv::COLOR_BGRA2BGR);
+			}
+		}
+		else if (func_device_id == DEVICE_OPTION::ZED_CAMERA_STEREO)
+		{
+			int width = zed_camera->getImageSize().width;
+			int height = zed_camera->getImageSize().height;
+			cv::Mat cam_temp = cv::Mat(height, width * 2, CV_8UC4);
+			cam_img = cv::Mat(height, width * 2, CV_8UC3);
+			cv::Mat zed_left = cv::Mat(height, width, CV_8UC4);
+			cv::Mat zed_right = cv::Mat(height, width, CV_8UC4);
+
+			if (!zed_camera->grab(sl::zed::SENSING_MODE::STANDARD))
+			{
+				// Retrieve left color image
+				sl::zed::Mat zedMat, zedMat2;
+				zedMat = zed_camera->retrieveImage(sl::zed::SIDE::LEFT);
+				memcpy(zed_left.data, zedMat.data, width * height * 4 * sizeof(uchar));
+				zedMat2 = zed_camera->retrieveImage(sl::zed::SIDE::RIGHT);
+				memcpy(zed_right.data, zedMat2.data, width * height * 4 * sizeof(uchar));//width*height * 4 * sizeof(uchar));
+				cv::Mat zed_roi = cam_temp(cv::Range(0, height), cv::Range(0, width));
+				zed_left.copyTo(zed_roi);
+				zed_roi = cam_temp(cv::Range(0, height), cv::Range(width, 2*width));
+				zed_right.copyTo(zed_roi);
+
+				cv::cvtColor(cam_temp, cam_img, cv::COLOR_BGRA2BGR);
+			}
+		}
+		else
+			this->video_cap >> cam_img;
 
 		// end of video stream
 		if (cam_img.empty())
