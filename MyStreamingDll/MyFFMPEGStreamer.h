@@ -73,13 +73,13 @@ private:
 	// ffmpeg methods
 	int write_frame(AVFormatContext *fmt_ctx, const AVRational *time_base, AVStream *st, AVPacket *pkt);
 	AVStream *add_stream(AVFormatContext *oc, AVCodec **codec, enum AVCodecID codec_id,
-						int img_width, int img_height, int bit_rate);
+						int img_width, int img_height, int64_t bit_rate);
 	void open_video(AVFormatContext *oc, AVCodec *codec, AVStream *st);
 	void write_video_frame(AVFormatContext *oc, AVStream *st, cv::Mat cv_img, int flush);
 	void close_video(AVStream *st);
 
 public:
-	bool Initialize(int img_width, int img_height, int bit_rate, 
+	bool Initialize(int img_width, int img_height, int64_t bit_rate, 
 					enum AVCodecID codec_id = AV_CODEC_ID_MPEG4,
 					std::string ip = "127.0.0.1", int port = 8554);
 	void Deinitialize();

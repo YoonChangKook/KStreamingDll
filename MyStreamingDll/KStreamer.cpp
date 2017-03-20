@@ -8,11 +8,9 @@ KStreamer::KStreamer()
 {}
 
 KStreamer::~KStreamer()
-{
-	ffmpeg.Deinitialize();
-}
+{}
 
-void KStreamer::SetFFMPEG(int img_width, int img_height, int bit_rate, 
+void KStreamer::SetFFMPEG(int img_width, int img_height, int64_t bit_rate, 
 						enum AVCodecID codec_id, std::string ip, int port)
 {
 	ffmpeg.Deinitialize();
@@ -96,8 +94,6 @@ void KStreamer::EndStream()
 	}
 
 	this->sender = NULL;
-
-	ffmpeg.Deinitialize();
 }
 
 int KStreamer::GetLastError()

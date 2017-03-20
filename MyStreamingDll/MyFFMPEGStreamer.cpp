@@ -12,7 +12,7 @@ MyFFMPEGStreamer::~MyFFMPEGStreamer()
 	Deinitialize();
 }
 
-bool MyFFMPEGStreamer::Initialize(int img_width, int img_height, int bit_rate, 
+bool MyFFMPEGStreamer::Initialize(int img_width, int img_height, int64_t bit_rate, 
 						enum AVCodecID codec_id, std::string ip, int port)
 {
 	int ret;
@@ -135,7 +135,7 @@ int MyFFMPEGStreamer::write_frame(AVFormatContext *fmt_ctx, const AVRational *ti
 }
 
 AVStream* MyFFMPEGStreamer::add_stream(AVFormatContext *oc, AVCodec **codec, enum AVCodecID codec_id,
-							int img_width, int img_height, int bit_rate)
+							int img_width, int img_height, int64_t bit_rate)
 {
 	AVCodecContext *c;
 	AVStream *st;
@@ -168,6 +168,7 @@ AVStream* MyFFMPEGStreamer::add_stream(AVFormatContext *oc, AVCodec **codec, enu
 	case AVMEDIA_TYPE_VIDEO:
 		c->codec_id = codec_id;
 		c->bit_rate = bit_rate;
+		//c->bit_rate = 1600000;
 		/* Resolution must be a multiple of two. */
 		c->width = img_width;
 		c->height = img_height;
@@ -316,8 +317,12 @@ void MyFFMPEGStreamer::write_video_frame(AVFormatContext *oc, AVStream *st, cv::
 void MyFFMPEGStreamer::close_video(AVStream *st)
 {
 	avcodec_close(st->codec);
-	av_free(this->src_picture.data[0]);
+	//std::cout << "codec" << std::endl;
+	av_free(this->src_picture.data[1]);
+	//std::cout << "src" << std::endl;
 	av_free(this->dst_picture.data[0]);
+	//std::cout << "dst" << std::endl;
 	av_frame_free(&this->frame);
+	//std::cout << "frame" << std::endl;
 	this->video_is_eof = 0;
 }
