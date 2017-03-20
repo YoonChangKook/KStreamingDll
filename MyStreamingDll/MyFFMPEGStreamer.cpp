@@ -12,7 +12,7 @@ MyFFMPEGStreamer::~MyFFMPEGStreamer()
 	Deinitialize();
 }
 
-bool MyFFMPEGStreamer::Initialize(int img_width, int img_height,
+bool MyFFMPEGStreamer::Initialize(int img_width, int img_height, int bit_rate, 
 						enum AVCodecID codec_id, std::string ip, int port)
 {
 	int ret;
@@ -47,7 +47,7 @@ bool MyFFMPEGStreamer::Initialize(int img_width, int img_height,
 	this->fmt->video_codec = codec_id;
 
 	if (fmt->video_codec != AV_CODEC_ID_NONE)
-		this->video_st = add_stream(oc, &video_codec, fmt->video_codec, img_width, img_height);
+		this->video_st = add_stream(oc, &video_codec, fmt->video_codec, img_width, img_height, bit_rate);
 
 	/* Now that all the parameters are set, we can open the audio and
 	* video codecs and allocate the necessary encode buffers. */
@@ -135,7 +135,7 @@ int MyFFMPEGStreamer::write_frame(AVFormatContext *fmt_ctx, const AVRational *ti
 }
 
 AVStream* MyFFMPEGStreamer::add_stream(AVFormatContext *oc, AVCodec **codec, enum AVCodecID codec_id,
-							int img_width, int img_height)
+							int img_width, int img_height, int bit_rate)
 {
 	AVCodecContext *c;
 	AVStream *st;
@@ -167,7 +167,7 @@ AVStream* MyFFMPEGStreamer::add_stream(AVFormatContext *oc, AVCodec **codec, enu
 
 	case AVMEDIA_TYPE_VIDEO:
 		c->codec_id = codec_id;
-		c->bit_rate = 3500000;
+		c->bit_rate = bit_rate;
 		/* Resolution must be a multiple of two. */
 		c->width = img_width;
 		c->height = img_height;
@@ -319,4 +319,5 @@ void MyFFMPEGStreamer::close_video(AVStream *st)
 	av_free(this->src_picture.data[0]);
 	av_free(this->dst_picture.data[0]);
 	av_frame_free(&this->frame);
+	this->video_is_eof = 0;
 }

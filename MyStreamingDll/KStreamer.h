@@ -79,7 +79,7 @@ private:
 	void SendStream();
 
 public:
-	void SetFFMPEG(int img_width, int img_height,
+	void SetFFMPEG(int img_width, int img_height, int bit_rate, 
 				enum AVCodecID codec_id = AV_CODEC_ID_MPEG4, 
 				std::string ip = "127.0.0.1", int port = 8554);
 	void SetCamDeviceID(int id);

@@ -3,17 +3,20 @@
 
 KStreamer::KStreamer()
 	: is_streaming(false), last_error(KStreamerError::NO_STREAMER_ERROR), 
-	sender(NULL), device_id(0), video_cap(), ffmpeg()
+	sender(NULL), device_id(0), video_cap(), zed_camera(NULL), zed_params(), 
+	ffmpeg()
 {}
 
 KStreamer::~KStreamer()
-{}
+{
+	ffmpeg.Deinitialize();
+}
 
-void KStreamer::SetFFMPEG(int img_width, int img_height,
+void KStreamer::SetFFMPEG(int img_width, int img_height, int bit_rate, 
 						enum AVCodecID codec_id, std::string ip, int port)
 {
 	ffmpeg.Deinitialize();
-	ffmpeg.Initialize(img_width, img_height, codec_id, ip, port);
+	ffmpeg.Initialize(img_width, img_height, bit_rate, codec_id, ip, port);
 }
 
 void KStreamer::SetCamDeviceID(int id)
@@ -86,8 +89,15 @@ void KStreamer::EndStream()
 	}
 	if (this->video_cap.isOpened())
 		this->video_cap.release();
+	if (this->zed_camera)
+	{
+		delete this->zed_camera;
+		this->zed_camera = NULL;
+	}
 
 	this->sender = NULL;
+
+	ffmpeg.Deinitialize();
 }
 
 int KStreamer::GetLastError()
@@ -113,6 +123,12 @@ void KStreamer::SendStream()
 		if (func_device_id == DEVICE_OPTION::ZED_CAMERA_LEFT ||
 			func_device_id == DEVICE_OPTION::ZED_CAMERA_RIGHT)
 		{
+			if (!zed_camera)
+			{
+				this->last_error = KStreamerError::CAM_NOT_OPENED;
+				return;
+			}
+
 			int width = zed_camera->getImageSize().width;
 			int height = zed_camera->getImageSize().height;
 			cv::Mat cam_temp = cv::Mat(height, width, CV_8UC4);
@@ -134,6 +150,12 @@ void KStreamer::SendStream()
 		}
 		else if (func_device_id == DEVICE_OPTION::ZED_CAMERA_STEREO)
 		{
+			if (!zed_camera)
+			{
+				this->last_error = KStreamerError::CAM_NOT_OPENED;
+				return;
+			}
+
 			int width = zed_camera->getImageSize().width;
 			int height = zed_camera->getImageSize().height;
 			cv::Mat cam_temp = cv::Mat(height, width * 2, CV_8UC4);
