@@ -1,11 +1,16 @@
-﻿빌드 시작: 2017-03-20 오후 7:22:35
+﻿빌드 시작: 2017-04-13 오후 4:59:08
      1>2 노드의 "D:\Yoon\Robot\VideoStream\KStreamingDll\MyStreamingDll\MyStreamingDll.vcxproj" 프로젝트(Build 대상)입니다.
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V120\Microsoft.CppBuild.targets(388,5): warning MSB8028: The intermediate directory (x64\Release\) contains files shared from another project (KyStreamingDll.vcxproj, MyStreamingDll.vcxproj).  This can lead to incorrect clean and rebuild behavior.
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /ID:\Yoon\Robot\VideoStream\ffmpeg\include /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include" /IC:\OpenCV2.4.13\build\include /I"C:\Program Files (x86)\ZED SDK\dependencies\eigen-3.2.8" /I"C:\Program Files (x86)\ZED SDK\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D NDEBUG /D _WINDOWS /D _USRDLL /D KSTREAMINGDLL_EXPORTS /D _WINDLL /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt MyFFMPEGStreamer.cpp
-         MyFFMPEGStreamer.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\CL.exe /c /ID:\Yoon\Robot\VideoStream\ffmpeg\include /I"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\include" /IC:\OpenCV2.4.13\build\include /I"C:\Program Files (x86)\ZED SDK\dependencies\eigen-3.2.8" /I"C:\Program Files (x86)\ZED SDK\include" /Zi /nologo /W3 /WX- /sdl /O2 /Oi /GL /D WIN32 /D KSTREAMINGDLL_EXPORTS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"x64\Release\\" /Fd"x64\Release\vc120.pdb" /Gd /TP /errorReport:prompt KStreamer.cpp
+         KStreamer.cpp
      1>d:\yoon\robot\videostream\ffmpeg\include\libavutil\rational.h : warning C4819: 현재 코드 페이지(949)에서 표시할 수 없는 문자가 파일에 들어 있습니다. 데이터가 손실되지 않게 하려면 해당 파일을 유니코드 형식으로 저장하십시오.
+     1>C:\Program Files (x86)\ZED SDK\include\zed/Camera.hpp(120): warning C4267: '인수' : 'size_t'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
      1>d:\yoon\robot\videostream\kstreamingdll\mystreamingdll\MyFFMPEGStreamer.h(60): warning C4251: 'MyFFMPEGStreamer::ip' : class 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>'에서는 class 'MyFFMPEGStreamer'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 합니다.
+     1>d:\yoon\robot\videostream\kstreamingdll\mystreamingdll\KStreamer.h(66): warning C4251: 'KStreamer::mtx_lock' : class 'std::mutex'에서는 class 'KStreamer'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 합니다.
+                 C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\include\mutex(105) : 'std::mutex' 선언을 참조하십시오.
+     1>d:\yoon\robot\videostream\kstreamingdll\mystreamingdll\KStreamer.h(70): warning C4251: 'KStreamer::video_cap' : class 'cv::VideoCapture'에서는 class 'KStreamer'의 클라이언트에서 DLL 인터페이스를 사용하도록 지정해야 합니다.
+                 C:\OpenCV2.4.13\build\include\opencv2/highgui/highgui.hpp(205) : 'cv::VideoCapture' 선언을 참조하십시오.
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\x86_amd64\link.exe /ERRORREPORT:PROMPT /OUT:"D:\Yoon\Robot\VideoStream\KStreamingDll\x64\Release\KStreamingDll.dll" /INCREMENTAL:NO /NOLOGO /LIBPATH:"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v8.0\lib\x64" /LIBPATH:"C:\Program Files (x86)\ZED SDK\dependencies\eigen-3.2.8" /LIBPATH:D:\Yoon\Robot\VideoStream\ffmpeg\lib /LIBPATH:C:\OpenCV2.4.13\build\x64\vc12\lib /LIBPATH:"C:\Program Files (x86)\ZED SDK\lib" kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"D:\Yoon\Robot\VideoStream\KStreamingDll\x64\Release\KStreamingDll.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\Yoon\Robot\VideoStream\KStreamingDll\x64\Release\KStreamingDll.lib" /MACHINE:X64 /DLL x64\Release\MyFFMPEGStreamer.obj
          x64\Release\KStreamer.obj
@@ -17,4 +22,4 @@
 
 빌드했습니다.
 
-경과 시간: 00:00:01.17
+경과 시간: 00:00:03.23

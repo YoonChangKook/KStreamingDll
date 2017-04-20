@@ -4,7 +4,7 @@
 KStreamer::KStreamer()
 	: is_streaming(false), last_error(KStreamerError::NO_STREAMER_ERROR), 
 	sender(NULL), device_id(0), video_cap(), zed_camera(NULL), zed_params(), 
-	ffmpeg()
+	ffmpeg(), sendEvent(NULL)
 {}
 
 KStreamer::~KStreamer()
@@ -104,9 +104,16 @@ int KStreamer::GetLastError()
 		return this->last_error;
 }
 
+void KStreamer::SetSendEvent(void(*sendEvent)(__in cv::Mat& cv_img))
+{
+	this->sendEvent = sendEvent;
+}
+
 void KStreamer::SendStream()
 {
 	cv::Mat cam_img;
+	cv::Mat frame_pool[STREAM_FPS];
+	int frame_pool_index = 0;
 	int func_device_id = this->device_id;
 
 	while (true)
@@ -195,8 +202,16 @@ void KStreamer::SendStream()
 		}
 		
 		// write frame
-		if(!this->ffmpeg.StreamImage(cam_img, false))
+		if (!this->ffmpeg.StreamImage(cam_img, false))
 			this->last_error = KStreamerError::FFMPEG_ERROR;
+
+		// occur event
+		if (this->sendEvent != NULL)
+		{
+			frame_pool[frame_pool_index] = cam_img.clone();
+			this->sendEvent(frame_pool[frame_pool_index]);
+			frame_pool_index = (frame_pool_index + 1) % STREAM_FPS;
+		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000 / STREAM_FPS));
 	}

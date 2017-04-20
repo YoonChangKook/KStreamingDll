@@ -78,6 +78,9 @@ private:
 	// stream sender
 	void SendStream();
 
+	// event occur when send image successfully
+	void(*sendEvent)(__in cv::Mat& cv_img);
+
 public:
 	void SetFFMPEG(int img_width, int img_height, int64_t bit_rate, 
 				enum AVCodecID codec_id = AV_CODEC_ID_MPEG4, 
@@ -86,6 +89,10 @@ public:
 	bool StartStream();
 	void EndStream();
 	int GetLastError();
+	/*
+	set event to get image when streamer succesfully send.
+	*/
+	void SetSendEvent(void(*sendEvent)(__in cv::Mat& cv_img));
 };
 
 #endif
