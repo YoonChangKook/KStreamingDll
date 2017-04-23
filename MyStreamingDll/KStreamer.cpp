@@ -4,7 +4,13 @@
 KStreamer::KStreamer()
 	: is_streaming(false), last_error(KStreamerError::NO_STREAMER_ERROR), 
 	sender(NULL), device_id(0), video_cap(), zed_camera(NULL), zed_params(), 
-	ffmpeg(), sendEvent(NULL)
+	is_zed_outside(false), ffmpeg(), sendEvent(NULL)
+{}
+
+KStreamer::KStreamer(__in sl::zed::Camera* zed_camera, __in const sl::zed::InitParams& zed_params)
+	: is_streaming(false), last_error(KStreamerError::NO_STREAMER_ERROR),
+	sender(NULL), device_id(0), video_cap(), zed_camera(zed_camera), zed_params(zed_params),
+	is_zed_outside(true), ffmpeg(), sendEvent(NULL)
 {}
 
 KStreamer::~KStreamer()
@@ -26,26 +32,32 @@ bool KStreamer::StartStream()
 {
 	EndStream();
 
+	if (this->device_id == DEVICE_OPTION::MANUAL)
+		return true;
+
 	if (this->device_id == DEVICE_OPTION::ZED_CAMERA_LEFT ||
 		this->device_id == DEVICE_OPTION::ZED_CAMERA_RIGHT ||
 		this->device_id == DEVICE_OPTION::ZED_CAMERA_STEREO)
 	{
-		this->zed_camera = new sl::zed::Camera(sl::zed::HD720, 30);
-		this->zed_params.mode = sl::zed::PERFORMANCE;
-		this->zed_params.unit = sl::zed::MILLIMETER;
-		this->zed_params.coordinate = sl::zed::IMAGE;
-		this->zed_params.disableSelfCalib = false;
-		this->zed_params.device = -1;
-		this->zed_params.verbose = false;
-		this->zed_params.vflip = false;
-
-		sl::zed::ERRCODE zederr = zed_camera->init(zed_params);
-
-		if (zederr != sl::zed::SUCCESS)
+		if (!is_zed_outside)
 		{
-			this->last_error = KStreamerError::CAM_NOT_OPENED;
-			delete zed_camera;
-			return false;
+			this->zed_camera = new sl::zed::Camera(sl::zed::HD720, 30);
+			this->zed_params.mode = sl::zed::PERFORMANCE;
+			this->zed_params.unit = sl::zed::MILLIMETER;
+			this->zed_params.coordinate = sl::zed::IMAGE;
+			this->zed_params.disableSelfCalib = false;
+			this->zed_params.device = -1;
+			this->zed_params.verbose = false;
+			this->zed_params.vflip = false;
+
+			sl::zed::ERRCODE zederr = zed_camera->init(zed_params);
+
+			if (zederr != sl::zed::SUCCESS)
+			{
+				this->last_error = KStreamerError::CAM_NOT_OPENED;
+				delete zed_camera;
+				return false;
+			}
 		}
 	}
 	else
@@ -87,18 +99,36 @@ void KStreamer::EndStream()
 	}
 	if (this->video_cap.isOpened())
 		this->video_cap.release();
-	if (this->zed_camera)
+
+	if (!this->is_zed_outside)
 	{
-		delete this->zed_camera;
-		this->zed_camera = NULL;
+		if (this->zed_camera)
+		{
+			delete this->zed_camera;
+			this->zed_camera = NULL;
+		}
 	}
 
 	this->sender = NULL;
 }
 
+bool KStreamer::SendFrameManually(__in const cv::Mat& cv_img)
+{
+	if (this->device_id != DEVICE_OPTION::MANUAL)
+		return false;
+
+	if (!this->ffmpeg.StreamImage(cv_img, false))
+	{
+		this->last_error = KStreamerError::FFMPEG_ERROR;
+		return false;
+	}
+
+	return true;
+}
+
 int KStreamer::GetLastError()
 {
-	if (KStreamerError::FFMPEG_ERROR)
+	if (this->last_error == KStreamerError::FFMPEG_ERROR)
 		return this->ffmpeg.GetLastError();
 	else
 		return this->last_error;

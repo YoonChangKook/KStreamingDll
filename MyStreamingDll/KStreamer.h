@@ -50,13 +50,15 @@ enum DEVICE_OPTION{
 	ZED_CAMERA_LEFT = 100, 
 	ZED_CAMERA_RIGHT = 101,
 	ZED_CAMERA_STEREO = 102, 
-	ALL_ROUND_CAMERA = 110
+	ALL_ROUND_CAMERA = 110,
+	MANUAL = 120
 };
 
 class K_STREAMING_API KStreamer
 {
 public:
 	KStreamer();
+	KStreamer(__in sl::zed::Camera* zed_camera, __in const sl::zed::InitParams& zed_params);
 	~KStreamer();
 
 private:
@@ -70,6 +72,7 @@ private:
 	cv::VideoCapture video_cap;
 	// zed camera
 #ifdef K_STREAMING_ZED
+	bool is_zed_outside;
 	sl::zed::Camera* zed_camera;
 	sl::zed::InitParams zed_params;
 #endif
@@ -88,6 +91,7 @@ public:
 	void SetCamDeviceID(int id);
 	bool StartStream();
 	void EndStream();
+	bool SendFrameManually(__in const cv::Mat& cv_img);
 	int GetLastError();
 	/*
 	set event to get image when streamer succesfully send.
