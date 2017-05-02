@@ -8,6 +8,7 @@
 #endif
 
 #include <string>
+#include <ctime>
 
 extern "C"
 {

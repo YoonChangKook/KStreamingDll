@@ -58,7 +58,9 @@ class K_STREAMING_API KStreamer
 {
 public:
 	KStreamer();
+#ifdef K_STREAMING_ZED
 	KStreamer(__in sl::zed::Camera* zed_camera, __in const sl::zed::InitParams& zed_params);
+#endif
 	~KStreamer();
 
 private:
