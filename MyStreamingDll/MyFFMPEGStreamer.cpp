@@ -254,10 +254,19 @@ void MyFFMPEGStreamer::write_video_frame(AVFormatContext *oc, AVStream *st, cv::
 		std::time_t rawtime;
 		struct std::tm* timeinfo;
 		char timebuf[80];
-		std::time(&rawtime);
-		timeinfo = std::localtime(&rawtime);
-		std::strftime(timebuf, sizeof(timebuf), "%d-%m-%Y %I:%M:%S", timeinfo);
+
+		SYSTEMTIME time;
+		GetLocalTime(&time);
+		sprintf(timebuf, "%04d:%02d:%02d-%02d:%02d:%02d:%03d",
+				time.wYear, time.wMonth, time.wDay,
+				time.wHour, time.wMinute, time.wSecond, time.wMilliseconds);
 		std::string timestr(timebuf);
+
+		//int milli = curTime.tv_usec / 1000;
+		//std::time(&rawtime);
+		//timeinfo = std::localtime(&rawtime);
+		//std::strftime(timebuf, sizeof(timebuf), "%d-%m-%Y %I:%M:%S", timeinfo);
+		//std::string timestr(timebuf);
 		cv::putText(cv_img, timestr, cv::Point(20, 20), cv::FONT_HERSHEY_SIMPLEX, 0.75, cv::Scalar::all(255), 2);
 
 		if (!sws_ctx) {

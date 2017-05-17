@@ -7,6 +7,7 @@
 #define MY_FFMPEG_API __declspec(dllimport)
 #endif
 
+#include <Windows.h>
 #include <string>
 #include <ctime>
 
